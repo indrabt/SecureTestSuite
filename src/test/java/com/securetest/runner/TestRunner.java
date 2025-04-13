@@ -8,6 +8,7 @@ import com.securetest.utils.PropertyManager;
 import com.securetest.utils.SensitiveDataManager;
 import io.cucumber.testng.AbstractTestNGCucumberTests;
 import io.cucumber.testng.CucumberOptions;
+import org.apache.commons.cli.HelpFormatter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.testng.ITestContext;
@@ -51,7 +52,23 @@ public class TestRunner extends AbstractTestNGCucumberTests {
             
             // Parse command line arguments
             if (!CommandLineParser.parseArgs(args)) {
+                // If --help was requested, exit normally
+                if (args.length > 0 && (args[0].equals("-h") || args[0].equals("--help"))) {
+                    System.exit(0);
+                }
+                
                 LOGGER.error("Failed to parse command line arguments. Exiting.");
+                System.exit(1);
+            }
+            
+            // Show command line option help if requested
+            if (CommandLineParser.hasOption("h")) {
+                // Help already displayed by CommandLineParser
+                System.exit(0);
+            }
+            
+            // Check for required parameters
+            if (!validateRequiredParameters()) {
                 System.exit(1);
             }
             
@@ -68,6 +85,9 @@ public class TestRunner extends AbstractTestNGCucumberTests {
                 LOGGER.info("Running with cucumber tags: {}", tags);
             }
             
+            // Log test configuration
+            logTestConfiguration();
+            
             // Execute tests using TestNG
             org.testng.TestNG testng = new org.testng.TestNG();
             testng.setTestClasses(new Class[] { TestRunner.class });
@@ -83,22 +103,76 @@ public class TestRunner extends AbstractTestNGCucumberTests {
     }
     
     /**
+     * Validates that all required parameters are present.
+     * 
+     * @return true if all required parameters are present, false otherwise
+     */
+    private static boolean validateRequiredParameters() {
+        boolean valid = true;
+        
+        // Determine which test scenario is being run based on tags
+        String tags = CommandLineParser.getOptionValue("t", "");
+        boolean isLoginTest = tags.contains("@login") || tags.isEmpty();
+        
+        // For login tests, username and password are required
+        if (isLoginTest) {
+            if (!CommandLineParser.hasOption("u")) {
+                LOGGER.error("Username (-u, --username) is required for login tests");
+                valid = false;
+            }
+            
+            if (!CommandLineParser.hasOption("p")) {
+                LOGGER.error("Password (-p, --password) is required for login tests");
+                valid = false;
+            }
+        }
+        
+        // Log validation result
+        if (!valid) {
+            LOGGER.error("Required command line parameters are missing");
+            HelpFormatter formatter = new HelpFormatter();
+            formatter.printHelp("SecureTestAutomation", CommandLineParser.getOptions());
+        }
+        
+        return valid;
+    }
+    
+    /**
+     * Logs the test configuration for debugging purposes.
+     * Avoids logging sensitive data.
+     */
+    private static void logTestConfiguration() {
+        LOGGER.info("Test Configuration:");
+        LOGGER.info("  Browser: {}", CommandLineParser.getOptionValue("b", "chrome"));
+        LOGGER.info("  Headless Mode: {}", CommandLineParser.getBooleanOption("headless", false));
+        LOGGER.info("  Parallel Execution: {}", CommandLineParser.getBooleanOption("parallel", false));
+        
+        // Log non-sensitive parameters
+        LOGGER.info("  Tags: {}", CommandLineParser.getOptionValue("t", "[none]"));
+        LOGGER.info("  Device Name: {}", CommandLineParser.getOptionValue("device", "[none]"));
+        
+        // Don't log sensitive parameters like username, password, etc.
+        LOGGER.info("  Username: [SECURED]");
+        LOGGER.info("  Password: [SECURED]");
+        LOGGER.info("  API Key: [SECURED]");
+    }
+    
+    /**
      * Overrides the default data provider to support parallel execution.
      * 
-     * @param context The TestNG context
      * @return The scenarios data provider
      */
     @Override
     @DataProvider(parallel = true)
-    public Object[][] scenarios(ITestContext context) {
+    public Object[][] scenarios() {
         boolean parallelExecution = CommandLineParser.getBooleanOption("parallel", false);
         
         if (parallelExecution) {
             LOGGER.info("Running tests in parallel mode");
-            return super.scenarios(context);
+            return super.scenarios();
         } else {
             LOGGER.info("Running tests in sequential mode");
-            return super.scenarios(context);
+            return super.scenarios();
         }
     }
     

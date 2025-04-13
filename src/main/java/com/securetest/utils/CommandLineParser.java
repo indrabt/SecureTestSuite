@@ -86,6 +86,12 @@ public class CommandLineParser {
                 .required(false)
                 .build();
                 
+        Option help = Option.builder("h")
+                .longOpt("help")
+                .desc("Display help information")
+                .required(false)
+                .build();
+                
         // Add all options
         options.addOption(username);
         options.addOption(password);
@@ -97,6 +103,7 @@ public class CommandLineParser {
         options.addOption(tags);
         options.addOption(parallel);
         options.addOption(headless);
+        options.addOption(help);
     }
     
     /**
@@ -106,11 +113,22 @@ public class CommandLineParser {
      * @return true if parsing was successful, false otherwise
      */
     public static boolean parseArgs(String[] args) {
-        CommandLineParser parser = new DefaultParser();
+        DefaultParser parser = new DefaultParser();
         HelpFormatter formatter = new HelpFormatter();
         
         try {
             cmd = parser.parse(options, args);
+            
+            // Print help and exit if help option is present
+            if (cmd.hasOption("h")) {
+                formatter.printHelp("SecureTestAutomation", 
+                    "\nSecure Test Automation Framework\n\n" +
+                    "Example: ./run.sh -u admin -p password -b chrome --headless true\n", 
+                    options,
+                    "\nFor more information, see README.md", true);
+                return false;
+            }
+            
             return true;
         } catch (ParseException e) {
             LOGGER.error("Error parsing command line arguments: {}", e.getMessage());
@@ -189,5 +207,52 @@ public class CommandLineParser {
      */
     public static Options getOptions() {
         return options;
+    }
+    
+    /**
+     * Gets a securely encrypted value for a command line option.
+     * 
+     * @param option The option name
+     * @return An encrypted value, or null if not provided
+     */
+    public static String getEncryptedValue(String option) {
+        String value = getOptionValue(option);
+        if (value == null || value.isEmpty()) {
+            return null;
+        }
+        
+        try {
+            return EncryptionUtil.encrypt(value);
+        } catch (Exception e) {
+            LOGGER.error("Failed to encrypt option '{}': {}", option, e.getMessage());
+            return null;
+        }
+    }
+    
+    /**
+     * Gets a securely encrypted username from command line.
+     * 
+     * @return An encrypted username, or null if not provided
+     */
+    public static String getEncryptedUsername() {
+        return getEncryptedValue("u");
+    }
+    
+    /**
+     * Gets a securely encrypted password from command line.
+     * 
+     * @return An encrypted password, or null if not provided
+     */
+    public static String getEncryptedPassword() {
+        return getEncryptedValue("p");
+    }
+    
+    /**
+     * Gets a securely encrypted API key from command line.
+     * 
+     * @return An encrypted API key, or null if not provided
+     */
+    public static String getEncryptedApiKey() {
+        return getEncryptedValue("a");
     }
 }

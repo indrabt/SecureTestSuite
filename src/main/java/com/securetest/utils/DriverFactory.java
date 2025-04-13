@@ -81,6 +81,8 @@ public class DriverFactory {
                 if (headless) {
                     firefoxOptions.addArguments("--headless");
                 }
+                firefoxOptions.addArguments("--no-sandbox");
+                firefoxOptions.addArguments("--disable-dev-shm-usage");
                 driver = new FirefoxDriver(firefoxOptions);
                 break;
                 
@@ -90,6 +92,8 @@ public class DriverFactory {
                 if (headless) {
                     edgeOptions.addArguments("--headless");
                 }
+                edgeOptions.addArguments("--no-sandbox");
+                edgeOptions.addArguments("--disable-dev-shm-usage");
                 driver = new EdgeDriver(edgeOptions);
                 break;
                 
@@ -104,6 +108,9 @@ public class DriverFactory {
                 if (headless) {
                     defaultOptions.addArguments("--headless");
                 }
+                defaultOptions.addArguments("--no-sandbox");
+                defaultOptions.addArguments("--disable-dev-shm-usage");
+                defaultOptions.addArguments("--disable-extensions");
                 driver = new ChromeDriver(defaultOptions);
                 break;
         }

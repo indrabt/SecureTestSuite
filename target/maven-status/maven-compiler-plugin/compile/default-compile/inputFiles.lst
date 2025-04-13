@@ -1,0 +1,12 @@
+/home/runner/workspace/src/main/java/com/securetest/pageobjects/OtpPage.java
+/home/runner/workspace/src/main/java/com/securetest/utils/DriverFactory.java
+/home/runner/workspace/src/main/java/com/securetest/utils/SensitiveDataManager.java
+/home/runner/workspace/src/main/java/com/securetest/pageobjects/LoginPage.java
+/home/runner/workspace/src/main/java/com/securetest/pageobjects/DashboardPage.java
+/home/runner/workspace/src/main/java/com/securetest/pageobjects/mobile/MobileBasePage.java
+/home/runner/workspace/src/main/java/com/securetest/pageobjects/mobile/OtpScreen.java
+/home/runner/workspace/src/main/java/com/securetest/utils/EncryptionUtil.java
+/home/runner/workspace/src/main/java/com/securetest/utils/CommandLineParser.java
+/home/runner/workspace/src/main/java/com/securetest/utils/AppiumHelper.java
+/home/runner/workspace/src/main/java/com/securetest/pageobjects/BasePage.java
+/home/runner/workspace/src/main/java/com/securetest/utils/PropertyManager.java

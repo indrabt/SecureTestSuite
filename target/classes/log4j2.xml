@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <Properties>
+        <Property name="LOG_PATTERN">%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n</Property>
+        <Property name="APP_LOG_ROOT">logs</Property>
+    </Properties>
+    
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <!-- Filter to avoid logging sensitive data -->
+            <RegexFilter regex="(?i).*(password|credential|apikey|key|token|secret).*" onMatch="DENY" onMismatch="ACCEPT"/>
+        </Console>
+        
+        <RollingFile name="FileAppender" fileName="${APP_LOG_ROOT}/secure-test.log"
+                     filePattern="${APP_LOG_ROOT}/secure-test-%d{yyyy-MM-dd}-%i.log">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <!-- Filter to avoid logging sensitive data -->
+            <RegexFilter regex="(?i).*(password|credential|apikey|key|token|secret).*" onMatch="DENY" onMismatch="ACCEPT"/>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="10MB" />
+                <TimeBasedTriggeringPolicy interval="1" />
+            </Policies>
+            <DefaultRolloverStrategy max="10"/>
+        </RollingFile>
+        
+        <RollingFile name="TestReportAppender" fileName="${APP_LOG_ROOT}/test-report.log"
+                     filePattern="${APP_LOG_ROOT}/test-report-%d{yyyy-MM-dd}-%i.log">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <!-- Filter to avoid logging sensitive data -->
+            <RegexFilter regex="(?i).*(password|credential|apikey|key|token|secret).*" onMatch="DENY" onMismatch="ACCEPT"/>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="10MB" />
+                <TimeBasedTriggeringPolicy interval="1" />
+            </Policies>
+            <DefaultRolloverStrategy max="10"/>
+        </RollingFile>
+    </Appenders>
+    
+    <Loggers>
+        <Root level="info">
+            <AppenderRef ref="Console" />
+            <AppenderRef ref="FileAppender" />
+        </Root>
+        
+        <!-- Specific logger for test results -->
+        <Logger name="TestResults" level="info" additivity="false">
+            <AppenderRef ref="TestReportAppender" />
+            <AppenderRef ref="Console" />
+        </Logger>
+        
+        <!-- Specific logger for secure data handling -->
+        <Logger name="com.securetest.utils.SensitiveDataManager" level="info" additivity="false">
+            <AppenderRef ref="Console" />
+            <AppenderRef ref="FileAppender" />
+        </Logger>
+        
+        <!-- Specific logger for encryption utilities -->
+        <Logger name="com.securetest.utils.EncryptionUtil" level="info" additivity="false">
+            <AppenderRef ref="Console" />
+            <AppenderRef ref="FileAppender" />
+        </Logger>
+        
+        <!-- Suppress excessive logging from Selenium/Appium -->
+        <Logger name="org.openqa.selenium" level="warn" additivity="false">
+            <AppenderRef ref="Console" />
+            <AppenderRef ref="FileAppender" />
+        </Logger>
+        
+        <Logger name="io.appium" level="warn" additivity="false">
+            <AppenderRef ref="Console" />
+            <AppenderRef ref="FileAppender" />
+        </Logger>
+    </Loggers>
+</Configuration>

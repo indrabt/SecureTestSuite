@@ -33,21 +33,42 @@ public class SensitiveDataManager {
     public static void initFromCommandLine() {
         LOGGER.info("Initializing sensitive data from command line arguments");
         
-        // Get sensitive data from command line
-        String username = CommandLineParser.getOptionValue("u");
-        String password = CommandLineParser.getOptionValue("p");
-        String apiKey = CommandLineParser.getOptionValue("a");
+        // Get pre-encrypted values using the CommandLineParser
+        String encryptedUsername = CommandLineParser.getEncryptedUsername();
+        String encryptedPassword = CommandLineParser.getEncryptedPassword();
+        String encryptedApiKey = CommandLineParser.getEncryptedApiKey();
+        
+        // Get other values and encrypt them
         String userId = CommandLineParser.getOptionValue("id");
         String phoneNumber = CommandLineParser.getOptionValue("phone");
         String deviceName = CommandLineParser.getOptionValue("device");
         
-        // Store encrypted values
-        storeSecurely(USERNAME, username);
-        storeSecurely(PASSWORD, password);
-        storeSecurely(API_KEY, apiKey);
+        // Store pre-encrypted values directly
+        if (encryptedUsername != null) {
+            encryptedData.put(USERNAME, encryptedUsername);
+            LOGGER.debug("Stored encrypted username");
+        }
+        
+        if (encryptedPassword != null) {
+            encryptedData.put(PASSWORD, encryptedPassword);
+            LOGGER.debug("Stored encrypted password");
+        }
+        
+        if (encryptedApiKey != null) {
+            encryptedData.put(API_KEY, encryptedApiKey);
+            LOGGER.debug("Stored encrypted API key");
+        }
+        
+        // Store other encrypted values
         storeSecurely(USER_ID, userId);
         storeSecurely(PHONE_NUMBER, phoneNumber);
         storeSecurely(DEVICE_NAME, deviceName);
+        
+        // Log success without revealing actual values
+        LOGGER.info("Sensitive data initialized successfully from command line");
+        if (encryptedUsername != null) LOGGER.info("✓ Username provided");
+        if (encryptedPassword != null) LOGGER.info("✓ Password provided");
+        if (encryptedApiKey != null) LOGGER.info("✓ API key provided");
     }
     
     /**
@@ -112,5 +133,59 @@ public class SensitiveDataManager {
     public static void clearAllSecureData() {
         encryptedData.clear();
         LOGGER.info("All secure data cleared from memory");
+    }
+    
+    /**
+     * Gets the securely stored username.
+     * 
+     * @return The decrypted username
+     */
+    public static String getUsername() {
+        return getSecureValue(USERNAME);
+    }
+    
+    /**
+     * Gets the securely stored password.
+     * 
+     * @return The decrypted password
+     */
+    public static String getPassword() {
+        return getSecureValue(PASSWORD);
+    }
+    
+    /**
+     * Gets the securely stored API key.
+     * 
+     * @return The decrypted API key
+     */
+    public static String getApiKey() {
+        return getSecureValue(API_KEY);
+    }
+    
+    /**
+     * Gets the securely stored user ID.
+     * 
+     * @return The decrypted user ID
+     */
+    public static String getUserId() {
+        return getSecureValue(USER_ID);
+    }
+    
+    /**
+     * Gets the securely stored phone number.
+     * 
+     * @return The decrypted phone number
+     */
+    public static String getPhoneNumber() {
+        return getSecureValue(PHONE_NUMBER);
+    }
+    
+    /**
+     * Gets the securely stored device name.
+     * 
+     * @return The decrypted device name
+     */
+    public static String getDeviceName() {
+        return getSecureValue(DEVICE_NAME);
     }
 }

@@ -2,6 +2,8 @@ package com.securetest.pageobjects.mobile;
 
 import com.securetest.utils.AppiumHelper;
 import io.appium.java_client.AppiumDriver;
+import io.appium.java_client.android.AndroidDriver;
+import io.appium.java_client.ios.IOSDriver;
 import io.appium.java_client.MobileBy;
 import io.appium.java_client.pagefactory.AndroidFindBy;
 import io.appium.java_client.pagefactory.iOSXCUITFindBy;
@@ -44,12 +46,16 @@ public class OtpScreen extends MobileBasePage {
      * @return This OtpScreen instance
      */
     public OtpScreen openMessagingApp() {
-        String devicePlatform = driver.getPlatformName().toLowerCase();
+        String devicePlatform = driver.getCapabilities().getPlatformName().toString().toLowerCase();
         
         if (devicePlatform.contains("android")) {
-            driver.activateApp("com.android.messaging");
+            if (driver instanceof AndroidDriver) {
+                ((AndroidDriver) driver).activateApp("com.android.messaging");
+            }
         } else if (devicePlatform.contains("ios")) {
-            driver.activateApp("com.apple.MobileSMS");
+            if (driver instanceof IOSDriver) {
+                ((IOSDriver) driver).activateApp("com.apple.MobileSMS");
+            }
         }
         
         LOGGER.info("Opened messaging app on {}", devicePlatform);
@@ -87,7 +93,7 @@ public class OtpScreen extends MobileBasePage {
      * @return This OtpScreen instance
      */
     public OtpScreen openConversationFromSender(String sender) {
-        String devicePlatform = driver.getPlatformName().toLowerCase();
+        String devicePlatform = driver.getCapabilities().getPlatformName().toString().toLowerCase();
         WebElement senderElement = null;
         
         try {

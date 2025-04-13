@@ -2,7 +2,12 @@ package com.securetest.utils;
 
 import io.appium.java_client.AppiumDriver;
 import io.appium.java_client.MobileBy;
+import io.appium.java_client.android.AndroidDriver;
+import io.appium.java_client.ios.IOSDriver;
+import io.appium.java_client.android.nativekey.AndroidKey;
+import io.appium.java_client.android.nativekey.KeyEvent;
 import io.appium.java_client.TouchAction;
+import io.appium.java_client.PerformsTouchActions;
 import io.appium.java_client.touch.WaitOptions;
 import io.appium.java_client.touch.offset.PointOption;
 import org.apache.logging.log4j.LogManager;
@@ -37,12 +42,12 @@ public class AppiumHelper {
             LOGGER.info("Attempting to retrieve OTP from SMS");
             
             // Check if we're on Android
-            boolean isAndroid = driver.getPlatformName().equalsIgnoreCase("Android");
+            boolean isAndroid = driver.getCapabilities().getPlatformName().toString().equalsIgnoreCase("Android");
             
             if (isAndroid) {
                 // Android implementation - opens SMS app and reads latest message
                 // This is a simplified example - actual implementation would depend on device specifics
-                driver.activateApp("com.android.messaging");
+                ((AndroidDriver) driver).activateApp("com.android.messaging");
                 WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(timeoutSeconds));
                 
                 // Wait for the first conversation to appear if filter is provided
@@ -114,14 +119,19 @@ public class AppiumHelper {
      */
     public static void swipe(AppiumDriver driver, int startX, int startY, int endX, int endY, int duration) {
         try {
-            new TouchAction(driver)
-                    .press(PointOption.point(startX, startY))
-                    .waitAction(WaitOptions.waitOptions(Duration.ofMillis(duration)))
-                    .moveTo(PointOption.point(endX, endY))
-                    .release()
-                    .perform();
-            
-            LOGGER.debug("Swiped from ({},{}) to ({},{})", startX, startY, endX, endY);
+            if (driver instanceof PerformsTouchActions) {
+                PerformsTouchActions touchDriver = (PerformsTouchActions) driver;
+                new TouchAction(touchDriver)
+                        .press(PointOption.point(startX, startY))
+                        .waitAction(WaitOptions.waitOptions(Duration.ofMillis(duration)))
+                        .moveTo(PointOption.point(endX, endY))
+                        .release()
+                        .perform();
+                
+                LOGGER.debug("Swiped from ({},{}) to ({},{})", startX, startY, endX, endY);
+            } else {
+                LOGGER.error("Driver does not support touch actions");
+            }
         } catch (Exception e) {
             LOGGER.error("Failed to perform swipe: {}", e.getMessage());
         }
@@ -197,11 +207,18 @@ public class AppiumHelper {
             int centerX = location.getX() + size.getWidth() / 2;
             int centerY = location.getY() + size.getHeight() / 2;
             
-            new TouchAction(driver)
-                    .tap(PointOption.point(centerX, centerY))
-                    .perform();
-            
-            LOGGER.debug("Tapped element at ({},{})", centerX, centerY);
+            if (driver instanceof PerformsTouchActions) {
+                PerformsTouchActions touchDriver = (PerformsTouchActions) driver;
+                new TouchAction(touchDriver)
+                        .tap(PointOption.point(centerX, centerY))
+                        .perform();
+                
+                LOGGER.debug("Tapped element at ({},{})", centerX, centerY);
+            } else {
+                // Fallback to standard click if touch actions not supported
+                element.click();
+                LOGGER.debug("Clicked element as fallback (touch actions not supported)");
+            }
         } catch (Exception e) {
             LOGGER.error("Failed to tap element: {}", e.getMessage());
         }
