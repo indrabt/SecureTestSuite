@@ -13,159 +13,162 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import java.time.Duration;
 
 /**
- * Base class for all web page objects.
- * Provides common functionality for web interactions.
+ * Base page class with common web element interaction methods.
+ * All page objects should extend this class.
  */
 public abstract class BasePage {
-    private static final Logger LOGGER = LogManager.getLogger(BasePage.class);
+    protected static final Logger LOGGER = LogManager.getLogger(BasePage.class);
     protected WebDriver driver;
     protected WebDriverWait wait;
     protected final int DEFAULT_TIMEOUT = 30;
     
     /**
-     * Constructor for BasePage.
+     * Constructor
      * 
-     * @param driver The WebDriver instance
+     * @param driver WebDriver instance
      */
     public BasePage(WebDriver driver) {
         this.driver = driver;
         this.wait = new WebDriverWait(driver, Duration.ofSeconds(DEFAULT_TIMEOUT));
         PageFactory.initElements(driver, this);
+        LOGGER.debug("Initialized page object: {}", this.getClass().getSimpleName());
     }
     
     /**
-     * Waits for an element to be clickable and then clicks it.
+     * Wait for element to be clickable and click on it
      * 
-     * @param element The element to click
+     * @param element WebElement to click
      */
     protected void click(WebElement element) {
         try {
             wait.until(ExpectedConditions.elementToBeClickable(element));
             element.click();
-            LOGGER.debug("Clicked element: {}", element);
         } catch (Exception e) {
-            LOGGER.error("Failed to click element: {}", e.getMessage());
+            LOGGER.error("Error clicking element: {}", e.getMessage());
             throw e;
         }
     }
     
     /**
-     * Clicks an element using JavaScript.
-     * Useful for elements that are not directly clickable.
+     * Click on element using JavaScript
      * 
-     * @param element The element to click
+     * @param element WebElement to click
      */
     protected void jsClick(WebElement element) {
         try {
             JavascriptExecutor executor = (JavascriptExecutor) driver;
             executor.executeScript("arguments[0].click();", element);
-            LOGGER.debug("JavaScript clicked element: {}", element);
         } catch (Exception e) {
-            LOGGER.error("Failed to JavaScript click element: {}", e.getMessage());
+            LOGGER.error("Error JS clicking element: {}", e.getMessage());
             throw e;
         }
     }
     
     /**
-     * Types text into an input field.
-     * Clears the field first, then types the text.
+     * Wait for element to be visible and enter text
      * 
-     * @param element The input element
-     * @param text The text to type
-     * @param sensitive Whether the text is sensitive (passwords, etc.)
+     * @param element WebElement to type in
+     * @param text Text to type
      */
-    protected void type(WebElement element, String text, boolean sensitive) {
+    protected void sendKeys(WebElement element, String text) {
         try {
             wait.until(ExpectedConditions.visibilityOf(element));
             element.clear();
             element.sendKeys(text);
-            
-            if (sensitive) {
-                LOGGER.debug("Typed sensitive text into element: {}", element);
-            } else {
-                LOGGER.debug("Typed text '{}' into element: {}", text, element);
-            }
         } catch (Exception e) {
-            LOGGER.error("Failed to type into element: {}", e.getMessage());
+            LOGGER.error("Error entering text: {}", e.getMessage());
             throw e;
         }
     }
     
     /**
-     * Waits for an element to be visible.
+     * Alternative method for typing text into elements with option to clear first
      * 
-     * @param element The element to wait for
-     * @return The WebElement once visible
+     * @param element WebElement to type in
+     * @param text Text to type
+     * @param clearFirst Whether to clear the field first
      */
-    protected WebElement waitForVisibility(WebElement element) {
+    protected void type(WebElement element, String text, boolean clearFirst) {
+        try {
+            wait.until(ExpectedConditions.visibilityOf(element));
+            if (clearFirst) {
+                element.clear();
+            }
+            element.sendKeys(text);
+            LOGGER.debug("Typed text into element: {}", element);
+        } catch (Exception e) {
+            LOGGER.error("Error typing text: {}", e.getMessage());
+            throw e;
+        }
+    }
+    
+    /**
+     * Wait for element to be visible
+     * 
+     * @param element WebElement to wait for
+     * @return WebElement that is now visible
+     */
+    protected WebElement waitForElementVisible(WebElement element) {
         return wait.until(ExpectedConditions.visibilityOf(element));
     }
     
     /**
-     * Waits for an element to be visible using a locator.
+     * Alternative name for waitForElementVisible
      * 
-     * @param locator The locator to find the element
-     * @return The WebElement once visible
+     * @param element WebElement to wait for
+     * @return WebElement that is now visible
      */
-    protected WebElement waitForVisibility(By locator) {
+    protected WebElement waitForVisibility(WebElement element) {
+        return waitForElementVisible(element);
+    }
+    
+    /**
+     * Wait for element to be visible based on locator
+     * 
+     * @param locator By locator
+     * @return WebElement that is now visible
+     */
+    protected WebElement waitForElementVisible(By locator) {
         return wait.until(ExpectedConditions.visibilityOfElementLocated(locator));
     }
     
     /**
-     * Waits for an element to be clickable.
+     * Check if element is displayed with a timeout
      * 
-     * @param element The element to wait for
-     * @return The WebElement once clickable
-     */
-    protected WebElement waitForClickability(WebElement element) {
-        return wait.until(ExpectedConditions.elementToBeClickable(element));
-    }
-    
-    /**
-     * Checks if an element is displayed.
-     * 
-     * @param element The element to check
-     * @return true if the element is displayed, false otherwise
+     * @param element WebElement to check
+     * @return true if element is displayed, false otherwise
      */
     protected boolean isElementDisplayed(WebElement element) {
         try {
-            return element.isDisplayed();
+            return waitForElementVisible(element).isDisplayed();
         } catch (Exception e) {
             return false;
         }
     }
     
     /**
-     * Scrolls to an element using JavaScript.
+     * Get page title
      * 
-     * @param element The element to scroll to
-     */
-    protected void scrollToElement(WebElement element) {
-        try {
-            JavascriptExecutor executor = (JavascriptExecutor) driver;
-            executor.executeScript("arguments[0].scrollIntoView(true);", element);
-            LOGGER.debug("Scrolled to element: {}", element);
-        } catch (Exception e) {
-            LOGGER.error("Failed to scroll to element: {}", e.getMessage());
-            throw e;
-        }
-    }
-    
-    /**
-     * Gets the page title.
-     * 
-     * @return The page title
+     * @return page title
      */
     public String getPageTitle() {
         return driver.getTitle();
     }
     
     /**
-     * Gets the current page URL.
+     * Get current URL
      * 
-     * @return The current URL
+     * @return current URL
      */
     public String getCurrentUrl() {
         return driver.getCurrentUrl();
+    }
+    
+    /**
+     * Wait for page to load completely
+     */
+    protected void waitForPageToLoad() {
+        wait.until(webDriver ->
+                ((JavascriptExecutor) webDriver).executeScript("return document.readyState").equals("complete"));
     }
 }

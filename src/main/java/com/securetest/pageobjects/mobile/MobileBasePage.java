@@ -1,7 +1,6 @@
 package com.securetest.pageobjects.mobile;
 
 import io.appium.java_client.AppiumDriver;
-import io.appium.java_client.MobileBy;
 import io.appium.java_client.pagefactory.AppiumFieldDecorator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -14,137 +13,177 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import java.time.Duration;
 
 /**
- * Base class for all mobile page objects.
- * Provides common functionality for mobile app interactions.
+ * Base page object for mobile application screens.
+ * Contains common mobile interactions and utilities.
  */
 public abstract class MobileBasePage {
-    private static final Logger LOGGER = LogManager.getLogger(MobileBasePage.class);
+    protected static final Logger LOGGER = LogManager.getLogger(MobileBasePage.class);
     protected AppiumDriver driver;
     protected WebDriverWait wait;
     protected final int DEFAULT_TIMEOUT = 30;
     
     /**
-     * Constructor for MobileBasePage.
+     * Constructor
      * 
-     * @param driver The AppiumDriver instance
+     * @param driver AppiumDriver instance
      */
     public MobileBasePage(AppiumDriver driver) {
         this.driver = driver;
         this.wait = new WebDriverWait(driver, Duration.ofSeconds(DEFAULT_TIMEOUT));
-        PageFactory.initElements(new AppiumFieldDecorator(driver), this);
+        PageFactory.initElements(new AppiumFieldDecorator(driver, Duration.ofSeconds(10)), this);
+        LOGGER.debug("Initialized mobile page object: {}", this.getClass().getSimpleName());
     }
     
     /**
-     * Waits for an element to be clickable and then clicks it.
+     * Wait for element to be clickable and click on it
      * 
-     * @param element The element to click
+     * @param element WebElement to click
      */
     protected void click(WebElement element) {
         try {
             wait.until(ExpectedConditions.elementToBeClickable(element));
             element.click();
-            LOGGER.debug("Clicked mobile element: {}", element);
         } catch (Exception e) {
-            LOGGER.error("Failed to click mobile element: {}", e.getMessage());
+            LOGGER.error("Error clicking mobile element: {}", e.getMessage());
             throw e;
         }
     }
     
     /**
-     * Types text into an input field.
+     * Wait for element to be visible and enter text
      * 
-     * @param element The input element
-     * @param text The text to type
-     * @param sensitive Whether the text is sensitive (passwords, etc.)
+     * @param element WebElement to type in
+     * @param text Text to type
      */
-    protected void type(WebElement element, String text, boolean sensitive) {
+    protected void sendKeys(WebElement element, String text) {
         try {
             wait.until(ExpectedConditions.visibilityOf(element));
             element.clear();
             element.sendKeys(text);
-            
-            if (sensitive) {
-                LOGGER.debug("Typed sensitive text into mobile element: {}", element);
-            } else {
-                LOGGER.debug("Typed text '{}' into mobile element: {}", text, element);
-            }
         } catch (Exception e) {
-            LOGGER.error("Failed to type into mobile element: {}", e.getMessage());
+            LOGGER.error("Error entering text on mobile: {}", e.getMessage());
             throw e;
         }
     }
     
     /**
-     * Waits for an element to be visible.
+     * Alternative method for typing text into elements with option to clear first
      * 
-     * @param element The element to wait for
-     * @return The WebElement once visible
+     * @param element WebElement to type in
+     * @param text Text to type
+     * @param clearFirst Whether to clear the field first
      */
-    protected WebElement waitForVisibility(WebElement element) {
+    protected void type(WebElement element, String text, boolean clearFirst) {
+        try {
+            wait.until(ExpectedConditions.visibilityOf(element));
+            if (clearFirst) {
+                element.clear();
+            }
+            element.sendKeys(text);
+            LOGGER.debug("Typed text into mobile element: {}", element);
+        } catch (Exception e) {
+            LOGGER.error("Error typing text on mobile: {}", e.getMessage());
+            throw e;
+        }
+    }
+    
+    /**
+     * Wait for element to be visible
+     * 
+     * @param element WebElement to wait for
+     * @return WebElement that is now visible
+     */
+    protected WebElement waitForElementVisible(WebElement element) {
         return wait.until(ExpectedConditions.visibilityOf(element));
     }
     
     /**
-     * Waits for an element to be visible using a locator.
+     * Alternative name for waitForElementVisible
      * 
-     * @param locator The locator to find the element
-     * @return The WebElement once visible
+     * @param element WebElement to wait for
+     * @return WebElement that is now visible
      */
-    protected WebElement waitForVisibility(By locator) {
+    protected WebElement waitForVisibility(WebElement element) {
+        return waitForElementVisible(element);
+    }
+    
+    /**
+     * Wait for element to be visible based on locator
+     * 
+     * @param locator By locator
+     * @return WebElement that is now visible
+     */
+    protected WebElement waitForElementVisible(By locator) {
         return wait.until(ExpectedConditions.visibilityOfElementLocated(locator));
     }
     
     /**
-     * Finds an element by its accessibility ID.
+     * Check if element is displayed with a timeout
      * 
-     * @param accessibilityId The accessibility ID
-     * @return The WebElement found
-     */
-    protected WebElement findByAccessibilityId(String accessibilityId) {
-        return driver.findElement(MobileBy.AccessibilityId(accessibilityId));
-    }
-    
-    /**
-     * Finds an element by XPath.
-     * 
-     * @param xpath The XPath expression
-     * @return The WebElement found
-     */
-    protected WebElement findByXPath(String xpath) {
-        return driver.findElement(MobileBy.xpath(xpath));
-    }
-    
-    /**
-     * Finds an element by ID.
-     * 
-     * @param id The ID
-     * @return The WebElement found
-     */
-    protected WebElement findById(String id) {
-        return driver.findElement(MobileBy.id(id));
-    }
-    
-    /**
-     * Checks if an element is displayed.
-     * 
-     * @param element The element to check
-     * @return true if the element is displayed, false otherwise
+     * @param element WebElement to check
+     * @return true if element is displayed, false otherwise
      */
     protected boolean isElementDisplayed(WebElement element) {
         try {
-            return element.isDisplayed();
+            return waitForElementVisible(element).isDisplayed();
         } catch (Exception e) {
             return false;
         }
     }
     
     /**
-     * Gets the text of an element.
+     * Get text from element with wait
      * 
-     * @param element The element to get text from
-     * @return The text of the element
+     * @param element WebElement to get text from
+     * @return text content of element
      */
     protected String getText(WebElement element) {
-        return waitForVisibility(element).getText();
+        waitForElementVisible(element);
+        return element.getText();
+    }
+    
+    /**
+     * Tap on coordinates
+     * 
+     * @param x x-coordinate
+     * @param y y-coordinate
+     */
+    protected void tapByCoordinates(int x, int y) {
+        try {
+            driver.executeScript("mobile: tap", x, y);
+            LOGGER.debug("Tapped on coordinates x={}, y={}", x, y);
+        } catch (Exception e) {
+            LOGGER.error("Error tapping on coordinates: {}", e.getMessage());
+            throw e;
+        }
+    }
+    
+    /**
+     * Swipe from one point to another
+     * 
+     * @param startX starting x-coordinate
+     * @param startY starting y-coordinate
+     * @param endX ending x-coordinate
+     * @param endY ending y-coordinate
+     * @param duration duration of swipe in milliseconds
+     */
+    protected void swipe(int startX, int startY, int endX, int endY, int duration) {
+        try {
+            driver.executeScript("mobile: swipe", startX, startY, endX, endY, duration);
+            LOGGER.debug("Swiped from ({},{}) to ({},{})", startX, startY, endX, endY);
+        } catch (Exception e) {
+            LOGGER.error("Error swiping: {}", e.getMessage());
+            throw e;
+        }
+    }
+    
+    /**
+     * Get OTP code from notifications or SMS
+     * This is a placeholder method to be implemented by specific pages
+     * 
+     * @return OTP code as string
+     */
+    public String getOtpCode() {
+        throw new UnsupportedOperationException("getOtpCode must be implemented in subclass");
     }
 }

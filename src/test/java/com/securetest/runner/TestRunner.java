@@ -4,6 +4,7 @@ import com.aventstack.extentreports.ExtentReports;
 import com.aventstack.extentreports.ExtentTest;
 import com.aventstack.extentreports.reporter.ExtentSparkReporter;
 import com.securetest.utils.CommandLineParser;
+import com.securetest.utils.EncryptionUtil;
 import com.securetest.utils.PropertyManager;
 import com.securetest.utils.SensitiveDataManager;
 import io.cucumber.testng.AbstractTestNGCucumberTests;
