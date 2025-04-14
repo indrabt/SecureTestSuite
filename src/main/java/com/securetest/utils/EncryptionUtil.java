@@ -12,7 +12,8 @@ import org.jasypt.exceptions.EncryptionOperationNotPossibleException;
 public class EncryptionUtil {
     private static final Logger LOGGER = LogManager.getLogger(EncryptionUtil.class);
     private static final String DEFAULT_ENCRYPTION_KEY = "SECURE_TEST_FRAMEWORK_KEY";
-    private static final String ALGORITHM = "PBEWITHHMACSHA512ANDAES_256";
+    // Using algorithms that are definitely supported by Jasypt
+    private static final String ALGORITHM = "PBEWithMD5AndTripleDES";
     private static final String LEGACY_ALGORITHM = "PBEWithMD5AndDES";
     private static final StandardPBEStringEncryptor encryptor = new StandardPBEStringEncryptor();
     private static final StandardPBEStringEncryptor legacyEncryptor = new StandardPBEStringEncryptor();
@@ -25,13 +26,14 @@ public class EncryptionUtil {
             // Set up the primary strong encryptor
             encryptor.setPassword(encryptionKey);
             encryptor.setAlgorithm(ALGORITHM);
-            encryptor.setKeyObtentionIterations(10000);
+            encryptor.setKeyObtentionIterations(1000);
+            LOGGER.info("Primary encryption initialized with algorithm: {}", ALGORITHM);
             
             // Set up the legacy encryptor for backward compatibility
             legacyEncryptor.setPassword(encryptionKey);
             legacyEncryptor.setAlgorithm(LEGACY_ALGORITHM);
             
-            LOGGER.info("Encryption utilities initialized successfully with algorithm: {}", ALGORITHM);
+            LOGGER.info("Encryption utilities initialized successfully");
         } catch (Exception e) {
             LOGGER.error("Failed to initialize encryption utilities: {}", e.getMessage());
             // We don't rethrow as this is a static initializer and would prevent class loading
