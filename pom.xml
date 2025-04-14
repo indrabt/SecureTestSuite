@@ -16,7 +16,7 @@
         <selenium.version>4.15.0</selenium.version>
         <appium.version>8.5.1</appium.version>
         <testng.version>7.7.1</testng.version>
-        <jasypt.version>1.9.3</jasypt.version>
+        <!-- jasypt is no longer used, now using standard JCE -->
         <log4j.version>2.20.0</log4j.version>
         <extentreports.version>5.0.9</extentreports.version>
         <commons-cli.version>1.5.0</commons-cli.version>
@@ -75,12 +75,7 @@
             <version>${testng.version}</version>
         </dependency>
 
-        <!-- Jasypt for Encryption -->
-        <dependency>
-            <groupId>org.jasypt</groupId>
-            <artifactId>jasypt</artifactId>
-            <version>${jasypt.version}</version>
-        </dependency>
+        <!-- Using standard JCE for encryption instead of Jasypt -->
 
         <!-- Apache Commons CLI for command line parsing -->
         <dependency>

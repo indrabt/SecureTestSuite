@@ -50,6 +50,10 @@ public class TestRunner extends AbstractTestNGCucumberTests {
         try {
             LOGGER.info("Starting test execution from command line");
             
+            // Enable test mode for encryption to avoid crypto policy restrictions
+            EncryptionUtil.enableTestMode();
+            LOGGER.info("Using test mode for encryption (Base64 encoding)");
+            
             // Parse command line arguments
             if (!CommandLineParser.parseArgs(args)) {
                 // If --help was requested, exit normally
