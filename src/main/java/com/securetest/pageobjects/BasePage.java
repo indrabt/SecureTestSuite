@@ -29,7 +29,7 @@ public abstract class BasePage {
      */
     public BasePage(WebDriver driver) {
         this.driver = driver;
-        this.wait = new WebDriverWait(driver, Duration.ofSeconds(DEFAULT_TIMEOUT));
+        this.wait = new WebDriverWait(driver, DEFAULT_TIMEOUT);
         PageFactory.initElements(driver, this);
         LOGGER.debug("Initialized page object: {}", this.getClass().getSimpleName());
     }

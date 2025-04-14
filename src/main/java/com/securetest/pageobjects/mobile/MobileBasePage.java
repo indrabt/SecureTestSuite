@@ -10,7 +10,7 @@ import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import java.time.Duration;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Base page object for mobile application screens.
@@ -29,8 +29,8 @@ public abstract class MobileBasePage {
      */
     public MobileBasePage(AppiumDriver driver) {
         this.driver = driver;
-        this.wait = new WebDriverWait(driver, Duration.ofSeconds(DEFAULT_TIMEOUT));
-        PageFactory.initElements(new AppiumFieldDecorator(driver, Duration.ofSeconds(10)), this);
+        this.wait = new WebDriverWait(driver, DEFAULT_TIMEOUT);
+        PageFactory.initElements(driver, this);
         LOGGER.debug("Initialized mobile page object: {}", this.getClass().getSimpleName());
     }
     

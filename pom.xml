@@ -9,13 +9,13 @@
     <version>1.0-SNAPSHOT</version>
 
     <properties>
-        <maven.compiler.source>18</maven.compiler.source>
-        <maven.compiler.target>18</maven.compiler.target>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <cucumber.version>7.11.1</cucumber.version>
-        <selenium.version>4.15.0</selenium.version>
-        <appium.version>8.5.1</appium.version>
-        <testng.version>7.7.1</testng.version>
+        <selenium.version>3.141.59</selenium.version>
+        <appium.version>7.6.0</appium.version>
+        <testng.version>7.4.0</testng.version>
         <!-- jasypt is no longer used, now using standard JCE -->
         <log4j.version>2.20.0</log4j.version>
         <extentreports.version>5.0.9</extentreports.version>
@@ -127,12 +127,6 @@
                     <source>${maven.compiler.source}</source>
                     <target>${maven.compiler.target}</target>
                     <fork>true</fork>
-                    <compilerArgs>
-                        <arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED</arg>
-                        <arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED</arg>
-                        <arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED</arg>
-                        <arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED</arg>
-                    </compilerArgs>
                 </configuration>
             </plugin>
             <plugin>

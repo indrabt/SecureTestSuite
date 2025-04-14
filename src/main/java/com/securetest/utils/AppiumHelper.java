@@ -10,13 +10,15 @@ import io.appium.java_client.TouchAction;
 import io.appium.java_client.PerformsTouchActions;
 import io.appium.java_client.touch.WaitOptions;
 import io.appium.java_client.touch.offset.PointOption;
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import java.time.Duration;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Helper class for Appium-specific operations.
@@ -42,13 +44,14 @@ public class AppiumHelper {
             LOGGER.info("Attempting to retrieve OTP from SMS");
             
             // Check if we're on Android
-            boolean isAndroid = driver.getCapabilities().getPlatformName().toString().equalsIgnoreCase("Android");
+            boolean isAndroid = driver.getCapabilities().getCapability("platformName").toString().equalsIgnoreCase("Android");
             
             if (isAndroid) {
                 // Android implementation - opens SMS app and reads latest message
                 // This is a simplified example - actual implementation would depend on device specifics
-                ((AndroidDriver) driver).activateApp("com.android.messaging");
-                WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(timeoutSeconds));
+                // Use launchApp instead of startActivity for older Appium versions
+                driver.launchApp();
+                WebDriverWait wait = new WebDriverWait(driver, timeoutSeconds);
                 
                 // Wait for the first conversation to appear if filter is provided
                 if (senderFilter != null && !senderFilter.isEmpty()) {
@@ -120,13 +123,14 @@ public class AppiumHelper {
     public static void swipe(AppiumDriver driver, int startX, int startY, int endX, int endY, int duration) {
         try {
             if (driver instanceof PerformsTouchActions) {
-                PerformsTouchActions touchDriver = (PerformsTouchActions) driver;
-                new TouchAction(touchDriver)
-                        .press(PointOption.point(startX, startY))
-                        .waitAction(WaitOptions.waitOptions(Duration.ofMillis(duration)))
-                        .moveTo(PointOption.point(endX, endY))
-                        .release()
-                        .perform();
+                // In older Appium Java client, use different approach
+                Map<String, Object> params = new HashMap<>();
+                params.put("startX", startX);
+                params.put("startY", startY);
+                params.put("endX", endX);
+                params.put("endY", endY);
+                params.put("duration", duration);
+                driver.executeScript("mobile: swipe", params);
                 
                 LOGGER.debug("Swiped from ({},{}) to ({},{})", startX, startY, endX, endY);
             } else {
@@ -209,9 +213,11 @@ public class AppiumHelper {
             
             if (driver instanceof PerformsTouchActions) {
                 PerformsTouchActions touchDriver = (PerformsTouchActions) driver;
-                new TouchAction(touchDriver)
-                        .tap(PointOption.point(centerX, centerY))
-                        .perform();
+                // For Java 8 compatibility
+                Map<String, Object> tapParams = new HashMap<>();
+                tapParams.put("x", centerX);
+                tapParams.put("y", centerY);
+                driver.executeScript("mobile: tap", tapParams);
                 
                 LOGGER.debug("Tapped element at ({},{})", centerX, centerY);
             } else {

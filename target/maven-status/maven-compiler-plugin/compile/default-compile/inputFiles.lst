@@ -8,6 +8,6 @@
 /home/runner/workspace/src/main/java/com/securetest/pageobjects/BasePage.java
 /home/runner/workspace/src/main/java/com/securetest/pageobjects/LoginPage.java
 /home/runner/workspace/src/main/java/com/securetest/pageobjects/mobile/OtpScreen.java
-/home/runner/workspace/src/main/java/com/securetest/utils/AppiumHelper.java
 /home/runner/workspace/src/main/java/com/securetest/utils/MockEncryptionUtil.java
+/home/runner/workspace/src/main/java/com/securetest/utils/AppiumHelper.java
 /home/runner/workspace/src/main/java/com/securetest/utils/PropertyManager.java

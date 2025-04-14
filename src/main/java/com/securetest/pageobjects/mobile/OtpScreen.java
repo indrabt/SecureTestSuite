@@ -46,15 +46,16 @@ public class OtpScreen extends MobileBasePage {
      * @return This OtpScreen instance
      */
     public OtpScreen openMessagingApp() {
-        String devicePlatform = driver.getCapabilities().getPlatformName().toString().toLowerCase();
+        String devicePlatform = driver.getCapabilities().getCapability("platformName").toString().toLowerCase();
         
         if (devicePlatform.contains("android")) {
             if (driver instanceof AndroidDriver) {
-                ((AndroidDriver) driver).activateApp("com.android.messaging");
+                // Open messaging app using a different method in old API
+                driver.launchApp();
             }
         } else if (devicePlatform.contains("ios")) {
             if (driver instanceof IOSDriver) {
-                ((IOSDriver) driver).activateApp("com.apple.MobileSMS");
+                driver.launchApp();
             }
         }
         
@@ -93,7 +94,7 @@ public class OtpScreen extends MobileBasePage {
      * @return This OtpScreen instance
      */
     public OtpScreen openConversationFromSender(String sender) {
-        String devicePlatform = driver.getCapabilities().getPlatformName().toString().toLowerCase();
+        String devicePlatform = driver.getCapabilities().getCapability("platformName").toString().toLowerCase();
         WebElement senderElement = null;
         
         try {

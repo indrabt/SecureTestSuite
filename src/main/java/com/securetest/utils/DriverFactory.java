@@ -18,7 +18,6 @@ import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.safari.SafariDriver;
 
 import java.net.URL;
-import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -88,13 +87,10 @@ public class DriverFactory {
                 
             case "edge":
                 WebDriverManager.edgedriver().setup();
-                EdgeOptions edgeOptions = new EdgeOptions();
-                if (headless) {
-                    edgeOptions.addArguments("--headless");
-                }
-                edgeOptions.addArguments("--no-sandbox");
-                edgeOptions.addArguments("--disable-dev-shm-usage");
-                driver = new EdgeDriver(edgeOptions);
+                // In Selenium 3.x, EdgeOptions did not have addArguments method
+                // Using DesiredCapabilities instead for Edge
+                DesiredCapabilities edgeCapabilities = DesiredCapabilities.edge();
+                driver = new EdgeDriver(edgeCapabilities);
                 break;
                 
             case "safari":
@@ -116,8 +112,8 @@ public class DriverFactory {
         }
         
         driver.manage().window().maximize();
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
-        driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(30));
+        driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+        driver.manage().timeouts().pageLoadTimeout(30, TimeUnit.SECONDS);
         
         webDriverThreadLocal.set(driver);
         LOGGER.info("Initialized WebDriver for browser: {}", browserName);
