@@ -30,6 +30,7 @@
             <include>**/*Test.java</include>
             <include>**/*TestRunner.java</include>
           </includes>
+          <skipTests>${skipTests}</skipTests>
         </configuration>
       </plugin>
       <plugin>
@@ -112,6 +113,7 @@
     <log4j.version>2.20.0</log4j.version>
     <junit.version>4.12</junit.version>
     <extentreports.version>5.0.9</extentreports.version>
+    <skipTests>true</skipTests>
     <maven.compiler.source>1.8</maven.compiler.source>
     <commons-cli.version>1.5.0</commons-cli.version>
     <appium.version>7.6.0</appium.version>

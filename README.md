@@ -14,10 +14,26 @@ This framework is designed for automating banking authentication flows securely,
 
 ## Security Features
 
-- All credentials are input via command line at runtime
-- Sensitive data is encrypted in memory
-- No logging of actual credential values (masked in logs)
-- Secure cleanup of sensitive data after test execution
+### Credential Security
+
+- All credentials are input via command line at runtime, never stored in code or config files
+- Sensitive data is encrypted in memory using AES encryption (or Base64 encoding in test mode)
+- No logging of actual credential values (masked in logs with patterns like `[SECURED]`)
+- Secure cleanup of sensitive data after test execution with explicit memory clearing
+
+### Implementation Details
+
+- `SensitiveDataManager`: Central class for securely storing and accessing credentials
+- `EncryptionUtil`: Handles encryption/decryption of sensitive data
+- `CommandLineParser`: Securely processes command-line arguments containing credentials
+- Memory hygiene: Explicit clearing of sensitive data after use
+
+### Best Practices Enforced
+
+- Credentials are never stored in test code or config files
+- Credentials are never logged, even in debug mode
+- Secure handling of OTPs and session tokens
+- All tests use the secure credential access pattern
 
 ## Requirements
 
@@ -86,13 +102,102 @@ To create a new test:
 2. Add `@Test` methods for your test cases
 3. Use `SensitiveDataManager` to access secure credentials
 
-Example:
+### Example Web Test
+
 ```java
-public class MyTest extends BaseTest {
+public class MyWebTest extends BaseTest {
     @Test
-    public void testSomething() {
+    public void testLogin() {
+        // Get secure credentials
         String username = SensitiveDataManager.getSecureData("username");
-        // Test implementation
+        String password = SensitiveDataManager.getSecureData("password");
+        
+        // Navigate to the login page
+        driver.get("https://example.com/login");
+        
+        // Enter credentials (never log the actual values)
+        driver.findElement(By.id("username")).sendKeys(username);
+        driver.findElement(By.id("password")).sendKeys(password);
+        
+        // Submit the form
+        driver.findElement(By.id("loginButton")).click();
+        
+        // Verify successful login
+        assertTrue(driver.findElement(By.id("welcomeMessage")).isDisplayed());
+    }
+}
+```
+
+### Example API Test
+
+```java
+public class MyApiTest {
+    @Test
+    public void testApiAccess() throws IOException {
+        // Get secure API key
+        String apiKey = SensitiveDataManager.getSecureData("apiKey");
+        assertNotNull("API Key not found", apiKey);
+        
+        // Set up HTTP client
+        CloseableHttpClient httpClient = HttpClients.createDefault();
+        HttpGet request = new HttpGet("https://api.example.com/data");
+        
+        // Add secure authentication header
+        request.addHeader("Authorization", "Bearer " + apiKey);
+        
+        // Execute request and verify response
+        try (CloseableHttpResponse response = httpClient.execute(request)) {
+            int statusCode = response.getStatusLine().getStatusCode();
+            assertEquals(200, statusCode);
+            
+            // Process response
+            String responseBody = EntityUtils.toString(response.getEntity());
+            JSONObject jsonResponse = new JSONObject(responseBody);
+            assertTrue(jsonResponse.has("success"));
+        }
+    }
+}
+```
+
+### Example Mobile Test
+
+```java
+public class MyMobileTest {
+    private AppiumDriver<MobileElement> driver;
+    
+    @Before
+    public void setUp() {
+        driver = AppiumHelper.initializeDriver("Android Device");
+    }
+    
+    @Test
+    public void testMobileApp() {
+        // Get secure credentials
+        String username = SensitiveDataManager.getSecureData("username");
+        String password = SensitiveDataManager.getSecureData("password");
+        
+        // Enter credentials in app
+        driver.findElement(By.id("username_field")).sendKeys(username);
+        driver.findElement(By.id("password_field")).sendKeys(password);
+        driver.findElement(By.id("login_button")).click();
+        
+        // Extract OTP if needed
+        String otp = AppiumHelper.retrieveOtpFromSms(driver, "BankApp", 30);
+        assertNotNull("Failed to retrieve OTP", otp);
+        
+        // Use OTP for authentication
+        driver.findElement(By.id("otp_field")).sendKeys(otp);
+        driver.findElement(By.id("verify_button")).click();
+        
+        // Verify successful authentication
+        assertTrue(driver.findElement(By.id("welcome_screen")).isDisplayed());
+    }
+    
+    @After
+    public void tearDown() {
+        if (driver != null) {
+            driver.quit();
+        }
     }
 }
 ```
