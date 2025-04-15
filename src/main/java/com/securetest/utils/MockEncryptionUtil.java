@@ -72,7 +72,12 @@ public class MockEncryptionUtil {
             return "****";
         } else {
             // Show first and last two characters, mask the rest
-            return value.substring(0, 2) + "*".repeat(length - 4) + value.substring(length - 2);
+            // Java 8 compatible version of string repeat
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < length - 4; i++) {
+                sb.append("*");
+            }
+            return value.substring(0, 2) + sb.toString() + value.substring(length - 2);
         }
     }
 }
