@@ -2,6 +2,7 @@ package com.securetest.utils;
 
 import io.appium.java_client.AppiumDriver;
 import io.appium.java_client.MobileBy;
+import io.appium.java_client.MobileElement;
 import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.ios.IOSDriver;
 import io.appium.java_client.android.nativekey.AndroidKey;
@@ -10,11 +11,17 @@ import io.appium.java_client.TouchAction;
 import io.appium.java_client.PerformsTouchActions;
 import io.appium.java_client.touch.WaitOptions;
 import io.appium.java_client.touch.offset.PointOption;
+import io.appium.java_client.remote.MobileCapabilityType;
+import io.appium.java_client.remote.AndroidMobileCapabilityType;
+import io.appium.java_client.remote.IOSMobileCapabilityType;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
+import java.net.URL;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.*;
+import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -227,6 +234,87 @@ public class AppiumHelper {
             }
         } catch (Exception e) {
             LOGGER.error("Failed to tap element: {}", e.getMessage());
+        }
+    }
+    
+    /**
+     * Initializes the Appium driver with appropriate capabilities.
+     * 
+     * @param deviceName The name of the device to use
+     * @return The initialized AppiumDriver instance
+     */
+    public static AppiumDriver<MobileElement> initializeDriver(String deviceName) {
+        try {
+            LOGGER.info("Initializing Appium driver for device: {}", deviceName);
+            
+            DesiredCapabilities capabilities = new DesiredCapabilities();
+            
+            // Set common capabilities
+            capabilities.setCapability(MobileCapabilityType.DEVICE_NAME, deviceName);
+            capabilities.setCapability(MobileCapabilityType.NEW_COMMAND_TIMEOUT, 60);
+            capabilities.setCapability(MobileCapabilityType.AUTOMATION_NAME, "UiAutomator2");
+            
+            // Determine platform based on device name (simple example)
+            boolean isAndroid = !deviceName.toLowerCase().contains("iphone") && 
+                               !deviceName.toLowerCase().contains("ipad") &&
+                               !deviceName.toLowerCase().contains("ios");
+            
+            if (isAndroid) {
+                LOGGER.info("Setting up Android driver capabilities");
+                capabilities.setCapability(MobileCapabilityType.PLATFORM_NAME, "Android");
+                capabilities.setCapability(MobileCapabilityType.APP, PropertyManager.getProperty("android.app.path", ""));
+                capabilities.setCapability(AndroidMobileCapabilityType.APP_PACKAGE, PropertyManager.getProperty("android.app.package", ""));
+                capabilities.setCapability(AndroidMobileCapabilityType.APP_ACTIVITY, PropertyManager.getProperty("android.app.activity", ""));
+                
+                // For simulation purposes, we'll just log info instead of creating an actual driver
+                LOGGER.info("Android capabilities configured. Would connect to Appium server in a real environment.");
+                
+                // In a real implementation, this would be:
+                // return new AndroidDriver<>(new URL("http://127.0.0.1:4723/wd/hub"), capabilities);
+                return null;
+            } else {
+                LOGGER.info("Setting up iOS driver capabilities");
+                capabilities.setCapability(MobileCapabilityType.PLATFORM_NAME, "iOS");
+                capabilities.setCapability(MobileCapabilityType.APP, PropertyManager.getProperty("ios.app.path", ""));
+                capabilities.setCapability(IOSMobileCapabilityType.BUNDLE_ID, PropertyManager.getProperty("ios.bundle.id", ""));
+                
+                // For simulation purposes, we'll just log info instead of creating an actual driver
+                LOGGER.info("iOS capabilities configured. Would connect to Appium server in a real environment.");
+                
+                // In a real implementation, this would be:
+                // return new IOSDriver<>(new URL("http://127.0.0.1:4723/wd/hub"), capabilities);
+                return null;
+            }
+        } catch (Exception e) {
+            LOGGER.error("Failed to initialize Appium driver: {}", e.getMessage(), e);
+            return null;
+        }
+    }
+    
+    /**
+     * Simulates retrieving an OTP from a mobile banking app.
+     * Used for demonstration purposes in the test framework.
+     * 
+     * @param driver The AppiumDriver instance
+     * @return A simulated 6-digit OTP code
+     */
+    public static String simulateOtpRetrieval(AppiumDriver<MobileElement> driver) {
+        LOGGER.info("Simulating OTP retrieval from mobile banking app");
+        
+        try {
+            // In a real implementation, we would navigate to the app's OTP screen
+            // and extract the actual OTP code
+            
+            // For simulation purposes, generate a random 6-digit OTP
+            Random random = new Random();
+            int otpInt = 100000 + random.nextInt(900000); // Generates a number between 100000 and 999999
+            String otp = String.valueOf(otpInt);
+            
+            LOGGER.info("Successfully simulated OTP retrieval. OTP value masked for security.");
+            return otp;
+        } catch (Exception e) {
+            LOGGER.error("Error during OTP simulation: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to simulate OTP retrieval", e);
         }
     }
 }

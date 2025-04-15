@@ -1,91 +1,106 @@
 # Secure Test Automation Framework
 
-A Java-based test automation framework for web and mobile apps using Cucumber, Selenium, and Appium with enhanced security features for sensitive data handling.
+A secure Java-based test automation framework using JUnit, Selenium, and Appium for web and mobile testing with sensitive credential protection.
 
-## Features
+## Overview
 
-- **Secure credential handling:** Uses in-memory encryption for sensitive data
-- **Command-line driven:** All credentials are input via command-line, never stored in code or config files
-- **Multi-platform support:** Works with Chrome, Firefox, Edge, and Safari browsers
-- **Mobile automation:** Full Appium integration for Android and iOS
-- **BDD approach:** Uses Cucumber for behavior-driven test definitions
-- **Reporting:** Integrated with ExtentReports for comprehensive test reporting
+This framework is designed for automating banking authentication flows securely, with a focus on:
 
-## Project Structure
+1. **Security**: Encryption for all sensitive data, no plaintext credentials in code or config files
+2. **Cross-platform**: Web automation with Selenium, mobile automation with Appium
+3. **Structure**: JUnit 4.12 test structure with clear separation of concerns
+4. **Flexibility**: Command-line based setup for CI/CD integration
+5. **Reporting**: Integrated ExtentReports for detailed test execution reporting
 
-- `src/main/java/com/securetest/pageobjects`: Page Object Models for web and mobile
-- `src/main/java/com/securetest/utils`: Utility classes for drivers, encryption, etc.
-- `src/test/java/com/securetest/stepdefinitions`: Cucumber step definitions
-- `src/test/java/com/securetest/runner`: Test runner for Cucumber tests
-- `src/test/resources/features`: Cucumber feature files
-- `src/test/resources/config.properties`: Configuration settings
+## Security Features
+
+- All credentials are input via command line at runtime
+- Sensitive data is encrypted in memory
+- No logging of actual credential values (masked in logs)
+- Secure cleanup of sensitive data after test execution
 
 ## Requirements
 
-- Java 18 or later
-- Maven 3.8 or later
-- For web testing: Browsers and WebDrivers (managed automatically via WebDriverManager)
-- For mobile testing: Appium server and mobile devices/emulators
+- Java 8 JDK
+- Maven 3.6+
+- Chrome or Firefox browser for web tests
+- Android SDK & Appium for mobile tests
 
-## Getting Started
+## Project Structure
 
-1. Clone the repository
-2. Run `mvn clean install` to build the project
-3. Update `src/test/resources/config.properties` with your environment settings
+```
+├── src/
+│   ├── main/java/com/securetest/
+│   │   ├── utils/           # Utility classes for encryption, drivers, etc.
+│   │   └── ...
+│   └── test/java/com/securetest/
+│       ├── runner/          # Test runners and executors
+│       ├── tests/           # Test classes
+│       └── ...
+├── test-output/             # Test reports and logs
+├── pom.xml                  # Maven configuration
+└── README.md                # This file
+```
 
-## Running Tests
+## Usage
 
-### Command Line
-
-Run tests with the provided scripts:
+### Running Tests from Command Line
 
 ```bash
-# On Linux/Mac:
-./run.sh -u <username> -p <password> -d <device-name> 
-
-# On Windows:
-run.bat -u <username> -p <password> -d <device-name>
+mvn clean test -Dusername=your_username -Dpassword=your_password
 ```
 
 ### Command Line Options
 
-- `-u, --username`: Username for Cuscal portal login
-- `-p, --password`: Password for Cuscal portal login
-- `-d, --device`: Mobile device name for OTP retrieval
-- `-b, --browser`: Browser to use (chrome, firefox, edge, safari)
-- `--headless`: Run in headless mode
-- `-t, --tags`: Cucumber tags for test filtering
-- `--parallel`: Run tests in parallel
+| Option | Description | Required |
+|--------|-------------|----------|
+| `-u, --username` | Username for authentication | Yes |
+| `-p, --password` | Password for authentication | Yes |
+| `-a, --apikey` | API key for API tests | For API tests |
+| `-b, --browser` | Browser to use (chrome/firefox) | No (default: chrome) |
+| `--headless` | Run in headless mode | No (default: false) |
+| `--device` | Mobile device name for Appium tests | For mobile tests |
 
-## Security Features
+### Example Commands
 
-- All sensitive data is encrypted in memory using AES-256
-- No plaintext credentials in logs or reports
-- Command-line entry for credentials with no storage
-- Secure disposal of sensitive data after test execution
-
-## Example Test
-
-```gherkin
-Feature: Cuscal Portal Authentication
-  As a user
-  I want to authenticate to the Cuscal portal securely
-  So that I can access my banking information
-
-  @login @smoke
-  Scenario: Successful login with valid credentials and OTP
-    Given I navigate to the Cuscal portal
-    When I enter my username
-    And I enter my password
-    And I click the login button
-    Then I should see the OTP page
-    When I initialize my mobile device for OTP retrieval
-    And I retrieve the OTP from my mobile device
-    And I enter the retrieved OTP
-    And I click the OTP verify button
-    Then I should see the dashboard page
+Web test with Chrome:
+```bash
+java -jar target/secure-test-automation-1.0-SNAPSHOT.jar -u myuser -p mypass -b chrome
 ```
+
+API test:
+```bash
+java -jar target/secure-test-automation-1.0-SNAPSHOT.jar -u myuser -p mypass -a myapikey
+```
+
+Mobile test:
+```bash
+java -jar target/secure-test-automation-1.0-SNAPSHOT.jar -u myuser -p mypass --device "Pixel 4"
+```
+
+## Creating New Tests
+
+To create a new test:
+
+1. Create a new test class extending `BaseTest`
+2. Add `@Test` methods for your test cases
+3. Use `SensitiveDataManager` to access secure credentials
+
+Example:
+```java
+public class MyTest extends BaseTest {
+    @Test
+    public void testSomething() {
+        String username = SensitiveDataManager.getSecureData("username");
+        // Test implementation
+    }
+}
+```
+
+## Reports
+
+Test reports are generated in the `test-output/extent-reports` directory after test execution.
 
 ## License
 
-Copyright (c) 2025 SecureTest
+Copyright © 2025 - All rights reserved

@@ -12,10 +12,10 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <cucumber.version>7.11.1</cucumber.version>
         <selenium.version>3.141.59</selenium.version>
         <appium.version>7.6.0</appium.version>
-        <testng.version>7.4.0</testng.version>
+        <junit.version>4.12</junit.version>
+        <cucumber.version>7.11.1</cucumber.version>
         <!-- jasypt is no longer used, now using standard JCE -->
         <log4j.version>2.20.0</log4j.version>
         <extentreports.version>5.0.9</extentreports.version>
@@ -25,18 +25,28 @@
     </properties>
 
     <dependencies>
-        <!-- Cucumber Dependencies -->
+        <!-- JUnit 4 Dependency -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Cucumber Dependencies (kept for step definitions temporarily) -->
         <dependency>
             <groupId>io.cucumber</groupId>
             <artifactId>cucumber-java</artifactId>
             <version>${cucumber.version}</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.cucumber</groupId>
-            <artifactId>cucumber-testng</artifactId>
+            <artifactId>cucumber-junit</artifactId>
             <version>${cucumber.version}</version>
+            <scope>test</scope>
         </dependency>
-
+        
         <!-- Selenium WebDriver -->
         <dependency>
             <groupId>org.seleniumhq.selenium</groupId>
@@ -66,13 +76,6 @@
                     <artifactId>selenium-api</artifactId>
                 </exclusion>
             </exclusions>
-        </dependency>
-
-        <!-- TestNG -->
-        <dependency>
-            <groupId>org.testng</groupId>
-            <artifactId>testng</artifactId>
-            <version>${testng.version}</version>
         </dependency>
 
         <!-- Using standard JCE for encryption instead of Jasypt -->
@@ -115,6 +118,20 @@
             <version>${lombok.version}</version>
             <scope>provided</scope>
         </dependency>
+        
+        <!-- JSON library for API testing -->
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20230227</version>
+        </dependency>
+        
+        <!-- HTTP Client for API testing -->
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.5.13</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -133,8 +150,16 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.0.0</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.apache.maven.surefire</groupId>
+                        <artifactId>surefire-junit4</artifactId>
+                        <version>3.0.0</version>
+                    </dependency>
+                </dependencies>
                 <configuration>
                     <includes>
+                        <include>**/*Test.java</include>
                         <include>**/*TestRunner.java</include>
                     </includes>
                 </configuration>

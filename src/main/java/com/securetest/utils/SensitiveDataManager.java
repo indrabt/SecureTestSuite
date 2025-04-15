@@ -188,4 +188,26 @@ public class SensitiveDataManager {
     public static String getDeviceName() {
         return getSecureValue(DEVICE_NAME);
     }
+    
+    /**
+     * Generic method to get secure data by key.
+     * This is the main method used by test classes to retrieve sensitive data.
+     * 
+     * @param key The key for the secure data
+     * @return The decrypted value or null if not found
+     */
+    public static String getSecureData(String key) {
+        return getSecureValue(key);
+    }
+    
+    /**
+     * Generic method to store secure data by key.
+     * This is the main method used by test classes to store sensitive data.
+     * 
+     * @param key The key for the secure data
+     * @param value The value to encrypt and store
+     */
+    public static void storeSecureData(String key, String value) {
+        storeSecurely(key, value);
+    }
 }

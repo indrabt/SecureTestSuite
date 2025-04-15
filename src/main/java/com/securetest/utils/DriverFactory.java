@@ -192,4 +192,17 @@ public class DriverFactory {
             LOGGER.info("AppiumDriver closed successfully");
         }
     }
+    
+    /**
+     * Simplified method to create a WebDriver instance based on browser name.
+     * This is the main entry point used by the test framework.
+     * 
+     * @param browserName The browser to use (chrome, firefox, edge, safari)
+     * @param headless Whether to run in headless mode
+     * @return The initialized WebDriver
+     */
+    public static WebDriver createDriver(String browserName, boolean headless) {
+        LOGGER.info("Creating WebDriver for browser: {}, headless: {}", browserName, headless);
+        return initWebDriver(browserName, headless);
+    }
 }
